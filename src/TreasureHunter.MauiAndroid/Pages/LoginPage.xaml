@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="TreasureHunter.MauiAndroid.Pages.LoginPage"
+             Title="Login"
+             Shell.NavBarIsVisible="False">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20" VerticalOptions="Center">
+            
+            <!-- App Title -->
+            <Label Text="🏴‍☠️ Treasure Hunter" 
+                   FontSize="32" 
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   Margin="0,40,0,40"/>
+
+            <!-- Email Entry -->
+            <Frame BorderColor="{StaticResource Primary}" Padding="0" CornerRadius="8">
+                <Entry x:Name="EmailEntry" 
+                       Placeholder="Email" 
+                       Keyboard="Email"
+                       Margin="10"/>
+            </Frame>
+
+            <!-- Password Entry -->
+            <Frame BorderColor="{StaticResource Primary}" Padding="0" CornerRadius="8">
+                <Entry x:Name="PasswordEntry" 
+                       Placeholder="Password" 
+                       IsPassword="True"
+                       Margin="10"/>
+            </Frame>
+
+            <!-- Login Button -->
+            <Button x:Name="LoginButton"
+                    Text="Login" 
+                    BackgroundColor="{StaticResource Primary}"
+                    TextColor="White"
+                    Clicked="OnLoginClicked"
+                    HeightRequest="50"
+                    CornerRadius="25"/>
+
+            <!-- Register Button -->
+            <Button x:Name="RegisterButton"
+                    Text="Create Account" 
+                    BackgroundColor="{StaticResource Secondary}"
+                    TextColor="White"
+                    Clicked="OnRegisterClicked"
+                    HeightRequest="50"
+                    CornerRadius="25"/>
+
+            <!-- Status Label -->
+            <Label x:Name="StatusLabel" 
+                   TextColor="Red"
+                   HorizontalOptions="Center"
+                   IsVisible="False"/>
+
+            <!-- Activity Indicator -->
+            <ActivityIndicator x:Name="LoadingIndicator" 
+                             IsRunning="False"
+                             IsVisible="False"
+                             Color="{StaticResource Primary}"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
