@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="TreasureHunter.MauiAndroid.Pages.RegisterPage"
+             Title="Register"
+             Shell.NavBarIsVisible="False">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20" VerticalOptions="Center">
+            
+            <!-- Title -->
+            <Label Text="Create Your Account" 
+                   FontSize="28" 
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   Margin="0,20,0,20"/>
+
+            <!-- Display Name Entry -->
+            <Frame BorderColor="{StaticResource Primary}" Padding="0" CornerRadius="8">
+                <Entry x:Name="DisplayNameEntry" 
+                       Placeholder="Display Name" 
+                       Margin="10"/>
+            </Frame>
+
+            <!-- Email Entry -->
+            <Frame BorderColor="{StaticResource Primary}" Padding="0" CornerRadius="8">
+                <Entry x:Name="EmailEntry" 
+                       Placeholder="Email" 
+                       Keyboard="Email"
+                       Margin="10"/>
+            </Frame>
+
+            <!-- Password Entry -->
+            <Frame BorderColor="{StaticResource Primary}" Padding="0" CornerRadius="8">
+                <Entry x:Name="PasswordEntry" 
+                       Placeholder="Password" 
+                       IsPassword="True"
+                       Margin="10"/>
+            </Frame>
+
+            <!-- Confirm Password Entry -->
+            <Frame BorderColor="{StaticResource Primary}" Padding="0" CornerRadius="8">
+                <Entry x:Name="ConfirmPasswordEntry" 
+                       Placeholder="Confirm Password" 
+                       IsPassword="True"
+                       Margin="10"/>
+            </Frame>
+
+            <!-- Register Button -->
+            <Button x:Name="RegisterButton"
+                    Text="Register" 
+                    BackgroundColor="{StaticResource Primary}"
+                    TextColor="White"
+                    Clicked="OnRegisterClicked"
+                    HeightRequest="50"
+                    CornerRadius="25"/>
+
+            <!-- Back to Login Button -->
+            <Button x:Name="BackButton"
+                    Text="Back to Login" 
+                    BackgroundColor="{StaticResource Secondary}"
+                    TextColor="White"
+                    Clicked="OnBackClicked"
+                    HeightRequest="50"
+                    CornerRadius="25"/>
+
+            <!-- Status Label -->
+            <Label x:Name="StatusLabel" 
+                   TextColor="Red"
+                   HorizontalOptions="Center"
+                   IsVisible="False"/>
+
+            <!-- Activity Indicator -->
+            <ActivityIndicator x:Name="LoadingIndicator" 
+                             IsRunning="False"
+                             IsVisible="False"
+                             Color="{StaticResource Primary}"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
