@@ -35,6 +35,8 @@ public class TreasureApiService : ITreasureApiService
         try
         {
             var client = CreateClient();
+            Debug.WriteLine($"Login request: {System.Text.Json.JsonSerializer.Serialize(request)}");
+            
             var response = await client.PostAsJsonAsync("/api/auth/login", request);
             
             if (response.IsSuccessStatusCode)
@@ -47,12 +49,14 @@ public class TreasureApiService : ITreasureApiService
                 return authResponse;
             }
             
-            Debug.WriteLine($"Login failed: {response.StatusCode}");
+            var errorContent = await response.Content.ReadAsStringAsync();
+            Debug.WriteLine($"Login failed: {response.StatusCode} - {errorContent}");
             return null;
         }
         catch (Exception ex)
         {
             Debug.WriteLine($"Login error: {ex.Message}");
+            Debug.WriteLine($"Stack trace: {ex.StackTrace}");
             return null;
         }
     }
@@ -62,6 +66,8 @@ public class TreasureApiService : ITreasureApiService
         try
         {
             var client = CreateClient();
+            Debug.WriteLine($"Register request: {System.Text.Json.JsonSerializer.Serialize(request)}");
+            
             var response = await client.PostAsJsonAsync("/api/auth/register", request);
             
             if (response.IsSuccessStatusCode)
@@ -75,12 +81,14 @@ public class TreasureApiService : ITreasureApiService
                 return authResponse;
             }
             
-            Debug.WriteLine($"Registration failed: {response.StatusCode}");
+            var errorContent = await response.Content.ReadAsStringAsync();
+            Debug.WriteLine($"Registration failed: {response.StatusCode} - {errorContent}");
             return null;
         }
         catch (Exception ex)
         {
             Debug.WriteLine($"Registration error: {ex.Message}");
+            Debug.WriteLine($"Stack trace: {ex.StackTrace}");
             return null;
         }
     }
@@ -90,7 +98,10 @@ public class TreasureApiService : ITreasureApiService
         try
         {
             var client = CreateClient();
-            var response = await client.GetAsync($"/api/treasure/nearby?latitude={lat}&longitude={lon}&radiusMeters={radius}");
+            var url = $"/api/treasure/nearby?latitude={lat}&longitude={lon}&radiusMeters={radius}";
+            Debug.WriteLine($"Get nearby items: {url}");
+            
+            var response = await client.GetAsync(url);
             
             if (response.IsSuccessStatusCode)
             {
@@ -98,12 +109,14 @@ public class TreasureApiService : ITreasureApiService
                 return items ?? new List<TreasureItemDto>();
             }
             
-            Debug.WriteLine($"Get nearby items failed: {response.StatusCode}");
+            var errorContent = await response.Content.ReadAsStringAsync();
+            Debug.WriteLine($"Get nearby items failed: {response.StatusCode} - {errorContent}");
             return new List<TreasureItemDto>();
         }
         catch (Exception ex)
         {
             Debug.WriteLine($"Get nearby items error: {ex.Message}");
+            Debug.WriteLine($"Stack trace: {ex.StackTrace}");
             return new List<TreasureItemDto>();
         }
     }
@@ -113,6 +126,8 @@ public class TreasureApiService : ITreasureApiService
         try
         {
             var client = CreateClient();
+            Debug.WriteLine($"Place item request: {System.Text.Json.JsonSerializer.Serialize(request)}");
+            
             var response = await client.PostAsJsonAsync("/api/treasure", request);
             
             if (response.IsSuccessStatusCode)
@@ -129,16 +144,18 @@ public class TreasureApiService : ITreasureApiService
                 }
             }
             
-            Debug.WriteLine($"Place item failed: {response.StatusCode}");
+            var errorContent = await response.Content.ReadAsStringAsync();
+            Debug.WriteLine($"Place item failed: {response.StatusCode} - {errorContent}");
             return new PlaceItemResponse
             {
                 Success = false,
-                Message = "Failed to place treasure"
+                Message = $"Failed to place treasure: {errorContent}"
             };
         }
         catch (Exception ex)
         {
             Debug.WriteLine($"Place item error: {ex.Message}");
+            Debug.WriteLine($"Stack trace: {ex.StackTrace}");
             return new PlaceItemResponse
             {
                 Success = false,
@@ -153,6 +170,8 @@ public class TreasureApiService : ITreasureApiService
         {
             var client = CreateClient();
             var locationData = new { Latitude = request.UserLatitude, Longitude = request.UserLongitude };
+            Debug.WriteLine($"Collect item {request.ItemId} at location: {System.Text.Json.JsonSerializer.Serialize(locationData)}");
+            
             var response = await client.PostAsJsonAsync($"/api/treasure/{request.ItemId}/collect", locationData);
             
             if (response.IsSuccessStatusCode)
@@ -182,6 +201,7 @@ public class TreasureApiService : ITreasureApiService
         catch (Exception ex)
         {
             Debug.WriteLine($"Collect item error: {ex.Message}");
+            Debug.WriteLine($"Stack trace: {ex.StackTrace}");
             return new CollectItemResponse
             {
                 Success = false,

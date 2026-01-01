@@ -1,6 +1,8 @@
-using TreasureHunter.API.Hubs;
+using Microsoft.EntityFrameworkCore;
 using TreasureHunter.Application;
 using TreasureHunter.Infrastructure;
+using TreasureHunter.Infrastructure.Persistence;
+using TreasureHunter.API.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,17 +11,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Add Application and Infrastructure layers
-builder.Services.AddApplication();
-builder.Services.AddInfrastructure(builder.Configuration);
-
-// Add SignalR
-builder.Services.AddSignalR();
-
 // Add CORS
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(policy =>
+    options.AddPolicy("AllowAll", policy =>
     {
         policy.AllowAnyOrigin()
               .AllowAnyMethod()
@@ -27,17 +22,26 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Add SignalR
+builder.Services.AddSignalR();
+
+// Add Application and Infrastructure layers
+builder.Services.AddApplication();
+builder.Services.AddInfrastructure(builder.Configuration);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TreasureHunter API v1"));
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
-app.UseCors();
+
+app.UseCors("AllowAll");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
