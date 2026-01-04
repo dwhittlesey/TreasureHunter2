@@ -39,7 +39,7 @@ public partial class LoginPage : ContentPage
         if (response != null && !string.IsNullOrEmpty(response.Token))
         {
             // Navigate to MainPage
-            await Shell.Current.GoToAsync("/MainPage");
+            await Shell.Current.GoToAsync("///MainPage");
         }
         else
         {

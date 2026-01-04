@@ -37,7 +37,7 @@ public class TreasureApiService : ITreasureApiService
             var client = CreateClient();
             Debug.WriteLine($"Login request: {System.Text.Json.JsonSerializer.Serialize(request)}");
             
-            var response = await client.PostAsJsonAsync("/api/auth/login", request);
+            var response = await client.PostAsJsonAsync("api/Auth/login", request);
             
             if (response.IsSuccessStatusCode)
             {
@@ -68,7 +68,7 @@ public class TreasureApiService : ITreasureApiService
             var client = CreateClient();
             Debug.WriteLine($"Register request: {System.Text.Json.JsonSerializer.Serialize(request)}");
             
-            var response = await client.PostAsJsonAsync("/api/auth/register", request);
+            var response = await client.PostAsJsonAsync("api/Auth/register", request);
             
             if (response.IsSuccessStatusCode)
             {

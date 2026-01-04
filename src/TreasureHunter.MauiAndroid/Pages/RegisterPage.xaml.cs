@@ -59,7 +59,7 @@ public partial class RegisterPage : ContentPage
         if (response != null && !string.IsNullOrEmpty(response.Token))
         {
             // Auto-login successful, navigate to MainPage
-            await Shell.Current.GoToAsync("//MainPage");
+            await Shell.Current.GoToAsync("///MainPage");
         }
         else
         {

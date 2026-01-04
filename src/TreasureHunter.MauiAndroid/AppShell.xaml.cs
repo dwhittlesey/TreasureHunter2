@@ -10,6 +10,6 @@ public partial class AppShell : Shell
 
         // Register routes for navigation
         Routing.RegisterRoute("RegisterPage", typeof(RegisterPage));
-        Routing.RegisterRoute("MainPage", typeof(MainPage));
+        // MainPage is now a ShellContent, no need to register as a route
     }
 }
