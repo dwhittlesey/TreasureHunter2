@@ -1,7 +1,11 @@
 using System.Diagnostics;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using Microsoft.Extensions.Http;
+using Microsoft.Extensions.DependencyInjection;
 using TreasureHunter.MauiAndroid.Services.Models;
+using static TreasureHunter.MauiAndroid.Services.TreasureApiService;
 
 namespace TreasureHunter.MauiAndroid.Services;
 
@@ -53,6 +57,24 @@ public class TreasureApiService : ITreasureApiService
             Debug.WriteLine($"Login failed: {response.StatusCode} - {errorContent}");
             return null;
         }
+        catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
+        {
+            Debug.WriteLine($"Login timeout: Request exceeded 30 seconds");
+            Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+            return null;
+        }
+        catch (TaskCanceledException ex)
+        {
+            Debug.WriteLine($"Login canceled or timeout: {ex.Message}");
+            Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+            return null;
+        }
+        catch (HttpRequestException ex)
+        {
+            Debug.WriteLine($"Login network error: {ex.Message}");
+            Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+            return null;
+        }
         catch (Exception ex)
         {
             Debug.WriteLine($"Login error: {ex.Message}");
@@ -85,6 +107,24 @@ public class TreasureApiService : ITreasureApiService
             Debug.WriteLine($"Registration failed: {response.StatusCode} - {errorContent}");
             return null;
         }
+        catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
+        {
+            Debug.WriteLine($"Registration timeout: Request exceeded 30 seconds");
+            Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+            return null;
+        }
+        catch (TaskCanceledException ex)
+        {
+            Debug.WriteLine($"Registration canceled or timeout: {ex.Message}");
+            Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+            return null;
+        }
+        catch (HttpRequestException ex)
+        {
+            Debug.WriteLine($"Registration network error: {ex.Message}");
+            Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+            return null;
+        }
         catch (Exception ex)
         {
             Debug.WriteLine($"Registration error: {ex.Message}");
@@ -111,6 +151,12 @@ public class TreasureApiService : ITreasureApiService
             
             var errorContent = await response.Content.ReadAsStringAsync();
             Debug.WriteLine($"Get nearby items failed: {response.StatusCode} - {errorContent}");
+            return new List<TreasureItemDto>();
+        }
+        catch (TaskCanceledException ex)
+        {
+            Debug.WriteLine($"Get nearby items timeout or canceled: {ex.Message}");
+            Debug.WriteLine($"Stack trace: {ex.StackTrace}");
             return new List<TreasureItemDto>();
         }
         catch (Exception ex)
@@ -150,6 +196,16 @@ public class TreasureApiService : ITreasureApiService
             {
                 Success = false,
                 Message = $"Failed to place treasure: {errorContent}"
+            };
+        }
+        catch (TaskCanceledException ex)
+        {
+            Debug.WriteLine($"Place item timeout or canceled: {ex.Message}");
+            Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+            return new PlaceItemResponse
+            {
+                Success = false,
+                Message = "Request timed out. Please check your connection and try again."
             };
         }
         catch (Exception ex)
@@ -198,6 +254,16 @@ public class TreasureApiService : ITreasureApiService
                 Message = errorContent
             };
         }
+        catch (TaskCanceledException ex)
+        {
+            Debug.WriteLine($"Collect item timeout or canceled: {ex.Message}");
+            Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+            return new CollectItemResponse
+            {
+                Success = false,
+                Message = "Request timed out. Please try again."
+            };
+        }
         catch (Exception ex)
         {
             Debug.WriteLine($"Collect item error: {ex.Message}");
@@ -207,6 +273,21 @@ public class TreasureApiService : ITreasureApiService
                 Success = false,
                 Message = $"Error: {ex.Message}"
             };
+        }
+    }
+
+    public async Task<bool> TestConnectionAsync()
+    {
+        try
+        {
+            var client = CreateClient();
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            var response = await client.GetAsync("api/health", cts.Token); // Add health endpoint to your API
+            return response.IsSuccessStatusCode;
+        }
+        catch
+        {
+            return false;
         }
     }
 
@@ -231,3 +312,4 @@ public class TreasureApiService : ITreasureApiService
         public int PointsEarned { get; set; }
     }
 }
+

@@ -1,226 +1,108 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:camera="clr-namespace:Camera.MAUI;assembly=Camera.MAUI"
              x:Class="TreasureHunter.MauiAndroid.Pages.MainPage"
-             Title="Treasure Hunter"
-             Shell.NavBarIsVisible="False">
+             Title="Treasure Hunter AR">
 
-    <Grid RowDefinitions="Auto,*,Auto">
-        
-        <!-- Row 0 - Status Bar -->
-        <Frame Grid.Row="0" BackgroundColor="{StaticResource Primary}" Padding="15" CornerRadius="0" Margin="0">
-            <Grid ColumnDefinitions="*,Auto">
-                <Label x:Name="PointsLabel" 
-                       Text="Points: 0" 
-                       TextColor="White"
-                       FontSize="18"
-                       FontAttributes="Bold"
-                       VerticalOptions="Center"/>
-                <Label x:Name="TrackingLabel" 
-                       Grid.Column="1"
-                       Text="📍 Inactive" 
-                       TextColor="White"
-                       FontSize="14"
-                       VerticalOptions="Center"/>
-            </Grid>
-        </Frame>
+    <Grid>
+        <!-- Camera View -->
+        <camera:CameraView 
+            x:Name="CameraView"
+            VerticalOptions="FillAndExpand"
+            HorizontalOptions="FillAndExpand" />
 
-        <!-- Row 1 - Main Content -->
-        <ScrollView Grid.Row="1">
-            <VerticalStackLayout Padding="15" Spacing="15">
-                
-                <!-- Mode Selector -->
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-                    <Button x:Name="DiscoveryButton"
-                            Text="🔍 Discovery"
-                            BackgroundColor="{StaticResource Primary}"
-                            TextColor="White"
-                            Clicked="OnDiscoveryModeClicked"
-                            CornerRadius="20"
-                            HeightRequest="45"/>
-                    <Button x:Name="CreationButton"
-                            Grid.Column="1"
-                            Text="➕ Creation"
-                            BackgroundColor="{StaticResource Secondary}"
-                            TextColor="White"
-                            Clicked="OnCreationModeClicked"
-                            CornerRadius="20"
-                            HeightRequest="45"/>
+        <!-- AR Overlay for treasures -->
+        <GraphicsView 
+            x:Name="TreasureOverlay"
+            InputTransparent="False"
+            VerticalOptions="FillAndExpand"
+            HorizontalOptions="FillAndExpand">
+            <GraphicsView.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnOverlayTapped" />
+            </GraphicsView.GestureRecognizers>
+        </GraphicsView>
+
+        <!-- UI Controls Overlay -->
+        <Grid 
+            VerticalOptions="FillAndExpand"
+            HorizontalOptions="FillAndExpand"
+            InputTransparent="True">
+            
+            <!-- Top Status Bar -->
+            <Frame 
+                BackgroundColor="#CC000000"
+                Padding="15,10"
+                CornerRadius="0"
+                HasShadow="False"
+                VerticalOptions="Start"
+                HorizontalOptions="FillAndExpand">
+                <Grid ColumnDefinitions="*,Auto,Auto">
+                    <Label 
+                        x:Name="StatusLabel"
+                        Text="Searching for treasures..."
+                        TextColor="White"
+                        VerticalOptions="Center" />
+                    <Label 
+                        x:Name="TreasureCountLabel"
+                        Grid.Column="1"
+                        Text="0 nearby"
+                        TextColor="Gold"
+                        Margin="10,0"
+                        VerticalOptions="Center" />
+                    <Label 
+                        x:Name="PointsLabel"
+                        Grid.Column="2"
+                        Text="0 pts"
+                        TextColor="Gold"
+                        FontAttributes="Bold"
+                        VerticalOptions="Center" />
                 </Grid>
+            </Frame>
 
-                <!-- Discovery Mode Layout -->
-                <VerticalStackLayout x:Name="DiscoveryLayout" IsVisible="True" Spacing="15">
-                    
-                    <Label Text="Nearby Treasures" 
-                           FontSize="24" 
-                           FontAttributes="Bold"
-                           Margin="0,10,0,0"/>
+            <!-- Bottom Controls -->
+            <StackLayout 
+                VerticalOptions="End"
+                HorizontalOptions="Center"
+                Margin="0,0,0,20"
+                Spacing="10">
+                
+                <!-- Compass indicator -->
+                <Frame 
+                    BackgroundColor="#CC000000"
+                    Padding="10"
+                    CornerRadius="20"
+                    HasShadow="False">
+                    <Label 
+                        x:Name="CompassLabel"
+                        Text="N"
+                        TextColor="White"
+                        FontSize="18"
+                        FontAttributes="Bold"
+                        HorizontalOptions="Center" />
+                </Frame>
 
-                    <!-- Proximity Frame -->
-                    <Frame x:Name="ProximityFrame" 
-                           BackgroundColor="LightGray"
-                           Padding="15" 
-                           CornerRadius="10"
-                           IsVisible="False">
-                        <VerticalStackLayout Spacing="8">
-                            <Label x:Name="ClosestItemLabel" 
-                                   FontSize="20" 
-                                   FontAttributes="Bold"
-                                   HorizontalOptions="Center"/>
-                            <Label x:Name="DistanceLabel" 
-                                   FontSize="16"
-                                   HorizontalOptions="Center"/>
-                            <Label x:Name="DirectionLabel" 
-                                   FontSize="14"
-                                   HorizontalOptions="Center"/>
-                            <Label x:Name="ProximityLabel" 
-                                   FontSize="18"
-                                   FontAttributes="Bold"
-                                   HorizontalOptions="Center"
-                                   Margin="0,10,0,0"/>
-                        </VerticalStackLayout>
-                    </Frame>
+                <!-- Action Button -->
+                <Button 
+                    x:Name="CollectButton"
+                    Text="Collect Treasure"
+                    BackgroundColor="Gold"
+                    TextColor="Black"
+                    FontAttributes="Bold"
+                    CornerRadius="25"
+                    Padding="30,15"
+                    IsVisible="False"
+                    Clicked="OnCollectClicked" />
+            </StackLayout>
 
-                    <!-- Collect Button -->
-                    <Button x:Name="CollectButton"
-                            Text="🎁 COLLECT TREASURE"
-                            BackgroundColor="Green"
-                            TextColor="White"
-                            FontSize="18"
-                            FontAttributes="Bold"
-                            HeightRequest="60"
-                            CornerRadius="30"
-                            IsVisible="False"
-                            Clicked="OnCollectClicked"/>
-
-                    <!-- Treasure List -->
-                    <CollectionView x:Name="TreasureCollection"
-                                    SelectionMode="None">
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate>
-                                <Frame Padding="10" Margin="0,5" CornerRadius="8" BackgroundColor="White">
-                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
-                                        <Label Grid.Column="0" 
-                                               Text="{Binding Emoji}" 
-                                               FontSize="32"
-                                               VerticalOptions="Center"/>
-                                        <VerticalStackLayout Grid.Column="1" Spacing="4">
-                                            <Label Text="{Binding Name}" 
-                                                   FontSize="16" 
-                                                   FontAttributes="Bold"/>
-                                            <Label Text="{Binding TypeName}" 
-                                                   FontSize="12"
-                                                   TextColor="Gray"/>
-                                            <Label Text="{Binding PointsText}" 
-                                                   FontSize="12"
-                                                   TextColor="Green"/>
-                                        </VerticalStackLayout>
-                                        <Label Grid.Column="2" 
-                                               Text="{Binding DistanceText}" 
-                                               FontSize="14"
-                                               VerticalOptions="Center"
-                                               TextColor="Gray"/>
-                                    </Grid>
-                                </Frame>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
-
-                </VerticalStackLayout>
-
-                <!-- Creation Mode Layout -->
-                <VerticalStackLayout x:Name="CreationLayout" IsVisible="False" Spacing="15">
-                    
-                    <Label Text="Drop a Treasure" 
-                           FontSize="24" 
-                           FontAttributes="Bold"
-                           Margin="0,10,0,0"/>
-
-                    <!-- Name Entry -->
-                    <Frame BorderColor="{StaticResource Primary}" Padding="0" CornerRadius="8">
-                        <Entry x:Name="NameEntry" 
-                               Placeholder="Treasure Name" 
-                               Margin="10"/>
-                    </Frame>
-
-                    <!-- Description Editor -->
-                    <Frame BorderColor="{StaticResource Primary}" Padding="0" CornerRadius="8">
-                        <Editor x:Name="DescriptionEditor" 
-                                Placeholder="Description (optional)" 
-                                HeightRequest="100"
-                                Margin="10"/>
-                    </Frame>
-
-                    <!-- Type Picker -->
-                    <Frame BorderColor="{StaticResource Primary}" Padding="0" CornerRadius="8">
-                        <Picker x:Name="TypePicker" 
-                                Title="Select Type"
-                                Margin="10"
-                                SelectedIndexChanged="OnTypePickerChanged">
-                            <Picker.ItemsSource>
-                                <x:Array Type="{x:Type x:String}">
-                                    <x:String>Common Treasure (100 pts)</x:String>
-                                    <x:String>Rare Artifact (300 pts)</x:String>
-                                    <x:String>Epic Relic (500 pts)</x:String>
-                                    <x:String>Legendary Item (1000 pts)</x:String>
-                                </x:Array>
-                            </Picker.ItemsSource>
-                        </Picker>
-                    </Frame>
-
-                    <!-- Discovery Radius Slider -->
-                    <VerticalStackLayout Spacing="5">
-                        <Label Text="Discovery Radius" FontSize="14" FontAttributes="Bold"/>
-                        <Slider x:Name="RadiusSlider" 
-                                Minimum="1" 
-                                Maximum="50" 
-                                Value="5"
-                                ValueChanged="OnRadiusChanged"/>
-                        <Label x:Name="RadiusLabel" 
-                               Text="5 meters" 
-                               FontSize="12"
-                               HorizontalOptions="Center"
-                               TextColor="Gray"/>
-                    </VerticalStackLayout>
-
-                    <!-- Location Label -->
-                    <Label x:Name="LocationLabel" 
-                           Text="Location: Not available" 
-                           FontSize="12"
-                           TextColor="Gray"
-                           HorizontalOptions="Center"/>
-
-                    <!-- Place Button -->
-                    <Button x:Name="PlaceButton"
-                            Text="📍 Drop Here"
-                            BackgroundColor="{StaticResource Primary}"
-                            TextColor="White"
-                            FontSize="16"
-                            FontAttributes="Bold"
-                            HeightRequest="50"
-                            CornerRadius="25"
-                            Clicked="OnPlaceClicked"/>
-
-                </VerticalStackLayout>
-
-            </VerticalStackLayout>
-        </ScrollView>
-
-        <!-- Row 2 - Status Messages -->
-        <Frame Grid.Row="2" 
-               x:Name="StatusMessageFrame"
-               BackgroundColor="{StaticResource Secondary}" 
-               Padding="15" 
-               CornerRadius="0" 
-               Margin="0"
-               IsVisible="False">
-            <Label x:Name="StatusMessageLabel" 
-                   TextColor="White"
-                   FontSize="14"
-                   HorizontalOptions="Center"
-                   VerticalOptions="Center"/>
-        </Frame>
-
+            <!-- Loading Indicator -->
+            <ActivityIndicator 
+                x:Name="LoadingIndicator"
+                IsRunning="False"
+                Color="Gold"
+                VerticalOptions="Center"
+                HorizontalOptions="Center" />
+        </Grid>
     </Grid>
 
 </ContentPage>

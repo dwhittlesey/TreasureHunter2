@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net10.0-android</TargetFrameworks>
@@ -8,49 +8,42 @@
     <SingleProject>true</SingleProject>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-
-    <!-- Display name -->
-    <ApplicationTitle>TreasureHunter</ApplicationTitle>
-
-    <!-- App Identifier -->
-    <ApplicationId>com.treasurehunter.android</ApplicationId>
-
-    <!-- Versions -->
+    
+    <!-- Display version -->
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
     <ApplicationVersion>1</ApplicationVersion>
-
-    <!-- Android Settings -->
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+    
+    <!-- App Identifier -->
+    <ApplicationId>com.treasurehunter.android</ApplicationId>
+    <ApplicationIdGuid>9e8b7f0a-7c3d-4e5f-9b2a-1d8c6e4f3a5b</ApplicationIdGuid>
+    
+    <!-- Target Android API -->
+    <SupportedOSPlatformVersion>21.0</SupportedOSPlatformVersion>
+    <TargetPlatformMinVersion>21.0</TargetPlatformMinVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- App Icon -->
-    <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
-
-    <!-- Splash Screen -->
-    <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
-
-    <!-- Images -->
-    <MauiImage Include="Resources\Images\*.svg" />
-    <MauiImage Include="Resources\Images\*.png" />
-    <MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208" />
-
-    <!-- Custom Fonts -->
-    <MauiFont Include="Resources\Fonts\*.ttf" />
-
-    <!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
-    <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" Exclude="Resources\Raw\.gitkeep" />
+    <!-- MAUI Core -->
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+    <PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
+    
+    <!-- SignalR Client for real-time communication -->
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.0" />
+    
+    <!-- Camera for AR view -->
+    <PackageReference Include="Camera.MAUI" Version="1.5.1" />
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+    
+    <!-- HTTP and JSON -->
+    <PackageReference Include="System.Net.Http.Json" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Maui.Controls" Version="10.0.20" />
-    <PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="10.0.20" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.1" />
+    <!-- Project References -->
+    <ProjectReference Include="..\TreasureHunter.Domain\TreasureHunter.Domain.csproj" />
+    <ProjectReference Include="..\TreasureHunter.Application\TreasureHunter.Application.csproj" />
   </ItemGroup>
 
 </Project>

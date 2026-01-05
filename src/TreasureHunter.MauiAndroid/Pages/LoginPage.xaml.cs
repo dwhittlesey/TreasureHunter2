@@ -6,11 +6,32 @@ namespace TreasureHunter.MauiAndroid.Pages;
 public partial class LoginPage : ContentPage
 {
     private readonly ITreasureApiService _apiService;
+    private CancellationTokenSource? _navigationCts;
 
     public LoginPage(ITreasureApiService apiService)
     {
         InitializeComponent();
         _apiService = apiService;
+    }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        _navigationCts = new CancellationTokenSource();
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        
+        // Cancel any pending operations
+        _navigationCts?.Cancel();
+        _navigationCts?.Dispose();
+        _navigationCts = null;
+        
+        // Explicitly unfocus controls to prevent race condition
+        EmailEntry?.Unfocus();
+        PasswordEntry?.Unfocus();
     }
 
     private async void OnLoginClicked(object sender, EventArgs e)
@@ -26,24 +47,46 @@ public partial class LoginPage : ContentPage
 
         SetLoading(true);
 
-        var request = new LoginRequest
+        try
         {
-            UserName = email,
-            Password = password
-        };
+            var request = new LoginRequest
+            {
+                UserName = email,
+                Password = password
+            };
 
-        var response = await _apiService.LoginAsync(request);
+            var response = await _apiService.LoginAsync(request);
 
-        SetLoading(false);
+            // Check if page was navigated away during async operation
+            if (_navigationCts?.IsCancellationRequested == true)
+            {
+                return;
+            }
 
-        if (response != null && !string.IsNullOrEmpty(response.Token))
-        {
-            // Navigate to MainPage
-            await Shell.Current.GoToAsync("///MainPage");
+            SetLoading(false);
+
+            if (response != null && !string.IsNullOrEmpty(response.Token))
+            {
+                // Navigate to MainPage
+                await Shell.Current.GoToAsync("///MainPage");
+            }
+            else
+            {
+                await ShowStatus("Login failed. Please check your credentials.");
+            }
         }
-        else
+        catch (Exception ex) when (_navigationCts?.IsCancellationRequested == true)
         {
-            await ShowStatus("Login failed. Please check your credentials.");
+            // Silently handle cancellation due to navigation
+            return;
+        }
+        catch (Exception ex)
+        {
+            if (_navigationCts?.IsCancellationRequested == false)
+            {
+                SetLoading(false);
+                await ShowStatus($"Error: {ex.Message}");
+            }
         }
     }
 
@@ -54,19 +97,38 @@ public partial class LoginPage : ContentPage
 
     private void SetLoading(bool isLoading)
     {
-        LoginButton.IsEnabled = !isLoading;
-        RegisterButton.IsEnabled = !isLoading;
-        LoadingIndicator.IsRunning = isLoading;
-        LoadingIndicator.IsVisible = isLoading;
+        // Check if controls are still available
+        if (LoginButton != null)
+            LoginButton.IsEnabled = !isLoading;
+        if (RegisterButton != null)
+            RegisterButton.IsEnabled = !isLoading;
+        if (LoadingIndicator != null)
+        {
+            LoadingIndicator.IsRunning = isLoading;
+            LoadingIndicator.IsVisible = isLoading;
+        }
     }
 
     private async Task ShowStatus(string message)
     {
+        if (StatusLabel == null || _navigationCts?.IsCancellationRequested == true)
+            return;
+
         StatusLabel.Text = message;
         StatusLabel.IsVisible = true;
         
-        await Task.Delay(3000);
-        
-        StatusLabel.IsVisible = false;
+        try
+        {
+            await Task.Delay(3000, _navigationCts?.Token ?? CancellationToken.None);
+            
+            if (StatusLabel != null && _navigationCts?.IsCancellationRequested == false)
+            {
+                StatusLabel.IsVisible = false;
+            }
+        }
+        catch (TaskCanceledException)
+        {
+            // Expected when navigating away
+        }
     }
 }
